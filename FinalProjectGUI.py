@@ -3,9 +3,9 @@ import numpy as np
 import soundfile as sf
 from scipy.signal import find_peaks
 from tkinter import Tk, Button, Label, filedialog, Frame
-import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 from pydub import AudioSegment
-import pandas as pd
 
 class AudioAnalyzer:
     def __init__(self, root):
@@ -13,6 +13,7 @@ class AudioAnalyzer:
         self.file_path = None
         self.audio_data = None
         self.sample_rate = None
+        self.summary = None
 
         # GUI Layout
         self.label = Label(root, text="Load an audio file", font=("Arial", 14))
@@ -29,6 +30,10 @@ class AudioAnalyzer:
 
         self.visualize_button = Button(root, text="Visualize Data", command=self.visualize_data, state="disabled")
         self.visualize_button.pack()
+        
+        # frame to display plots
+        self.plot_frame = Frame(root)
+        self.plot_frame.pack(fill="both", expand=True)
 
     def load_file(self):
         self.file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav *.mp3 *.aac")])
@@ -66,7 +71,6 @@ class AudioAnalyzer:
         peaks, _ = find_peaks(self.audio_data, height=np.max(self.audio_data) * 0.8)
         highest_resonant_freq = self.sample_rate / len(peaks) if len(peaks) > 0 else 0
 
-        # Placeholder for RT60 (requires detailed room acoustics computation)
         rt60 = duration * 0.6
 
         # Data summary
@@ -82,32 +86,39 @@ class AudioAnalyzer:
     def visualize_data(self):
         if self.audio_data is None:
             return
+        
+        for widget in self.plot_frame.winfo_children():
+            widget.destroy()
 
         time = np.linspace(0, len(self.audio_data) / self.sample_rate, num=len(self.audio_data))
+        
+        fig = Figure(figsize=(10, 6))
 
         # Waveform plot
-        plt.figure(figsize=(10, 4))
-        plt.plot(time, self.audio_data)
-        plt.title("Waveform")
-        plt.xlabel("Time (s)")
-        plt.ylabel("Amplitude")
-        plt.show()
+        ax1 = fig.add_subplot(311)
+        ax1.plot(time, self.audio_data)
+        ax1.set_title("Waveform")
+        ax1.set_xlabel("Time (s)")
+        ax1.set_ylabel("Amplitude")
 
         # RT60 Visualization (Placeholder)
         rt60_values = [self.summary["RT60 (s)"] / 3] * 3  # Low, Mid, High (Placeholder)
-        plt.figure(figsize=(10, 4))
-        plt.bar(["Low", "Mid", "High"], rt60_values, color=['blue', 'green', 'red'])
-        plt.title("RT60 Values Across Frequency Ranges")
-        plt.ylabel("RT60 (s)")
-        plt.show()
+        ax2 = fig.add_subplot(312)
+        ax2.bar(["Low", "Mid", "High"], rt60_values, color=['blue', 'green', 'red'])
+        ax2.set_title("RT60 Values Across Frequency Ranges")
+        ax2.set_ylabel("RT60 (s)")
 
         # Histogram of amplitude
-        plt.figure(figsize=(10, 4))
-        plt.hist(self.audio_data, bins=50, color='gray', edgecolor='black')
-        plt.title("Amplitude Distribution")
-        plt.xlabel("Amplitude")
-        plt.ylabel("Frequency")
-        plt.show()
+        ax3 = fig.add_subplot(313)
+        ax3.hist(self.audio_data, bins=50, color='gray', edgecolor='black')
+        ax3.set_title("Amplitude Distribution")
+        ax3.set_xlabel("Amplitude")
+        ax3.set_ylabel("Frequency")
+
+        # Embed the figure in the Tkinter frame
+        canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+        canvas.draw()
 
 
 # Main Application
