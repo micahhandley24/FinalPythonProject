@@ -15,25 +15,28 @@ class AudioAnalyzer:
         self.sample_rate = None
         self.summary = None
 
+        # Set the window size
+        self.root.geometry("1200x800")
+        
         # GUI Layout
         self.label = Label(root, text="Load an audio file", font=("Arial", 14))
-        self.label.pack()
+        self.label.pack(padx=10, pady=10)
 
         self.load_button = Button(root, text="Load File", command=self.load_file)
-        self.load_button.pack()
+        self.load_button.pack(padx=10, pady=10)
 
         self.clean_button = Button(root, text="Clean and Process Audio", command=self.clean_audio, state="disabled")
-        self.clean_button.pack()
+        self.clean_button.pack(padx=10, pady=10)
 
         self.analysis_button = Button(root, text="Analyze Data", command=self.analyze_audio, state="disabled")
-        self.analysis_button.pack()
+        self.analysis_button.pack(padx=10, pady=10)
 
         self.visualize_button = Button(root, text="Visualize Data", command=self.visualize_data, state="disabled")
-        self.visualize_button.pack()
+        self.visualize_button.pack(padx=10, pady=10)
         
         # frame to display plots
         self.plot_frame = Frame(root)
-        self.plot_frame.pack(fill="both", expand=True)
+        self.plot_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
     def load_file(self):
         self.file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav *.mp3 *.aac")])
@@ -92,7 +95,10 @@ class AudioAnalyzer:
 
         time = np.linspace(0, len(self.audio_data) / self.sample_rate, num=len(self.audio_data))
         
-        fig = Figure(figsize=(10, 6))
+        fig = Figure(figsize=(8, 4))
+
+        # Adjust space between subplots
+        fig.subplots_adjust(hspace=1, wspace=0.2)
 
         # Waveform plot
         ax1 = fig.add_subplot(311)
