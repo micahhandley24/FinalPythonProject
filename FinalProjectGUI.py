@@ -8,6 +8,7 @@ from matplotlib.figure import Figure
 from pydub import AudioSegment
 
 class AudioAnalyzer:
+    # Initializing new instance
     def __init__(self, root):
         self.root = root
         self.file_path = None
@@ -37,16 +38,19 @@ class AudioAnalyzer:
         # frame to display plots
         self.plot_frame = Frame(root)
         self.plot_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
+        
+    # Opens file dialog allowing user to select an audio file
     def load_file(self):
         self.file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav *.mp3 *.aac")])
         if self.file_path:
             self.label.config(text=f"Loaded: {os.path.basename(self.file_path)}")
+            # Handling non .wav files
             if not self.file_path.endswith(".wav"):
                 self.convert_to_wav()
             else:
                 self.clean_button.config(state="normal")
-
+                
+    # Converts file to .wav
     def convert_to_wav(self):
         sound = AudioSegment.from_file(self.file_path)
         self.file_path = self.file_path.rsplit(".", 1)[0] + ".wav"
@@ -54,6 +58,7 @@ class AudioAnalyzer:
         self.label.config(text=f"Converted to WAV: {os.path.basename(self.file_path)}")
         self.clean_button.config(state="normal")
 
+    # Cleans audio and enables analysis button
     def clean_audio(self):
         # Read WAV file
         self.audio_data, self.sample_rate = sf.read(self.file_path)
@@ -66,6 +71,8 @@ class AudioAnalyzer:
         self.label.config(text=f"Audio cleaned: {os.path.basename(self.file_path)}")
         self.analysis_button.config(state="normal")
 
+    # Extracts duration, high resonant frequency, and RT60 
+    # from audio and enables visualize button
     def analyze_audio(self):
         if self.audio_data is None:
             return
@@ -86,6 +93,7 @@ class AudioAnalyzer:
         self.label.config(text=f"Analysis Complete. Duration: {duration:.2f}s, Freq: {highest_resonant_freq:.2f}Hz, RT60: {rt60:.2f}s")
         self.visualize_button.config(state="normal")
 
+    # Generates visualizations and embeds them in GUI
     def visualize_data(self):
         if self.audio_data is None:
             return
