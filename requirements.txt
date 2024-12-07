@@ -1,0 +1,2 @@
+The list of packages that need to be pip installed:
+numpy, soundfile, scipy, tkinter, matplotlib, pydub
